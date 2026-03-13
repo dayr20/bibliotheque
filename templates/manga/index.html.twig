@@ -37,8 +37,8 @@
                             <select name="rating_min" id="rating_min" class="form-select">
                                 <option value="">Toutes</option>
                                 {% for i in 1..5 %}
-                                    <option value="{{ i }}" {% if search.rating_min|default('') == i|string %}selected{% endif %}>
-                                        {{ i }}+ {{ '★'|repeat(i) }}
+                                    <option value="{{ i }}" {% if search.rating_min|default('') == i ~ '' %}selected{% endif %}>
+                                        {{ i }}+ {% for s in 1..i %}★{% endfor %}
                                     </option>
                                 {% endfor %}
                             </select>
@@ -69,7 +69,7 @@
                             <select name="year" id="year" class="form-select">
                                 <option value="">Toutes</option>
                                 {% for y in years|default([]) %}
-                                    <option value="{{ y }}" {% if search.year|default('') == y|string %}selected{% endif %}>{{ y }}</option>
+                                    <option value="{{ y }}" {% if search.year|default('') == y ~ '' %}selected{% endif %}>{{ y }}</option>
                                 {% endfor %}
                             </select>
                         </div>
