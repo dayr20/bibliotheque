@@ -1,0 +1,113 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Mangas{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Liste des Mangas</h1>
+        {% if can_edit %}
+            <a href="{{ path('app_manga_new') }}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Ajouter un nouveau manga
+            </a>
+        {% endif %}
+    </div>
+
+    {# Formulaire de recherche #}
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="title" class="form-control" placeholder="Rechercher par titre" value="{{ search.title|default('') }}">
+                </div>
+                <div class="col-md-4">
+                    <input type="text" name="author" class="form-control" placeholder="Rechercher par auteur" value="{{ search.author|default('') }}">
+                </div>
+                <div class="col-md-3">
+                    <select name="genre" class="form-select">
+                        <option value="">Tous les genres</option>
+                        <option value="Action" {% if search.genre == 'Action' %}selected{% endif %}>Action</option>
+                        <option value="Adventure" {% if search.genre == 'Adventure' %}selected{% endif %}>Aventure</option>
+                        <option value="Fantasy" {% if search.genre == 'Fantasy' %}selected{% endif %}>Fantasy</option>
+                        <option value="Drama" {% if search.genre == 'Drama' %}selected{% endif %}>Drame</option>
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# Liste des mangas #}
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for manga in mangas %}
+            <div class="col">
+                <div class="card h-100">
+                    {% if manga.coverImage %}
+                        <img src="{{ manga.coverImage }}" class="card-img-top" alt="{{ manga.title }}">
+                    {% else %}
+                        <div class="card-img-top bg-light text-center py-5">
+                            <i class="fas fa-book fa-3x text-muted"></i>
+                        </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ manga.title }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ manga.author }}</h6>
+                        <p class="card-text">{{ manga.description|slice(0, 100) }}...</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="rating">
+                                {% for i in 1..5 %}
+                                    {% if i <= manga.rating %}
+                                        <i class="fas fa-star text-warning"></i>
+                                    {% else %}
+                                        <i class="far fa-star text-warning"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% if manga.isNew %}
+                                <span class="badge bg-success">Nouveau</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="btn-group w-100">
+                            <a href="{{ path('app_manga_show', {'id': manga.id}) }}" class="btn btn-outline-primary">
+                                <i class="fas fa-eye"></i> Voir
+                            </a>
+                            {% if can_edit %}
+                                <a href="{{ path('app_manga_edit', {'id': manga.id}) }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-edit"></i> Éditer
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    {% if search|length > 0 %}
+                        Aucun manga ne correspond à votre recherche.
+                    {% else %}
+                        Aucun manga n'est disponible pour le moment.
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.card-img-top {
+    height: 300px;
+    object-fit: cover;
+}
+</style>
+{% endblock %}

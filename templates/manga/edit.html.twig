@@ -1,0 +1,120 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier {{ manga.title }}{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('app_manga_index') }}">Mangas</a></li>
+            <li class="breadcrumb-item"><a href="{{ path('app_manga_show', {'id': manga.id}) }}">{{ manga.title }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Modifier</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="h3 mb-0">Modifier : {{ manga.title }}</h1>
+                </div>
+                <div class="card-body">
+                    <form method="POST" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Titre</label>
+                            <input type="text" class="form-control" id="title" name="title" value="{{ manga.title }}" required>
+                            <div class="invalid-feedback">Le titre est obligatoire</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="author" class="form-label">Auteur</label>
+                            <input type="text" class="form-control" id="author" name="author" value="{{ manga.author }}" required>
+                            <div class="invalid-feedback">L'auteur est obligatoire</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="5" required>{{ manga.description }}</textarea>
+                            <div class="invalid-feedback">La description est obligatoire</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="coverImage" class="form-label">Image de couverture (URL)</label>
+                            <input type="url" class="form-control" id="coverImage" name="coverImage" value="{{ manga.coverImage }}">
+                            <div class="form-text">Laissez vide pour garder l'image actuelle</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="rating" class="form-label">Note</label>
+                            <select class="form-select" id="rating" name="rating" required>
+                                <option value="">Choisir une note</option>
+                                {% for i in 1..5 %}
+                                    <option value="{{ i }}" {% if manga.rating == i %}selected{% endif %}>
+                                        {{ i }} - {% if i == 5 %}Excellent{% elseif i == 4 %}Très bon{% elseif i == 3 %}Bon{% elseif i == 2 %}Moyen{% else %}Faible{% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Veuillez sélectionner une note</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Genres</label>
+                            <div class="row">
+                                {% set currentGenres = [] %}
+                                {% for genre in manga.genres %}
+                                    {% set currentGenres = currentGenres|merge([genre.name]) %}
+                                {% endfor %}
+                                {% for genreName in ['Action', 'Adventure', 'Fantasy', 'Drama'] %}
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="genres[]"
+                                                   value="{{ genreName }}" id="genre-{{ genreName|lower }}"
+                                                   {% if genreName in currentGenres %}checked{% endif %}>
+                                            <label class="form-check-label" for="genre-{{ genreName|lower }}">
+                                                {% if genreName == 'Adventure' %}Aventure{% elseif genreName == 'Drama' %}Drame{% else %}{{ genreName }}{% endif %}
+                                            </label>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="isNew" name="isNew" {% if manga.isNew %}checked{% endif %}>
+                            <label class="form-check-label" for="isNew">Marquer comme nouveau</label>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Enregistrer les modifications
+                            </button>
+                            <a href="{{ path('app_manga_show', {'id': manga.id}) }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Annuler
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+(function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms).forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+            }
+            form.classList.add('was-validated')
+        }, false)
+    })
+})()
+</script>
+{% endblock %}

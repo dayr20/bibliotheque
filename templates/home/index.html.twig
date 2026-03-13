@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+{% block title %}MangaZone - Accueil{% endblock %}
+
+{% block body %}
+    <div class="hero-section">
+        <div class="container hero-content">
+            <h1 class="display-4">Bienvenue sur MangaZone</h1>
+            <p class="lead">Découvrez les mangas populaires et les dernières sorties !</p>
+            <a href="{{ path('app_manga_index') }}" class="btn btn-light text-danger">Explorer</a>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        <h2 class="mb-4">Mangas Populaires</h2>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-4">
+            {% for manga in popularMangas %}
+                {% include 'partials/manga_card.html.twig' with {'manga': manga} %}
+            {% else %}
+                <p>Aucun manga populaire trouvé.</p>
+            {% endfor %}
+        </div>
+
+        <h2 class="mb-4 mt-5">Nouveautés</h2>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-4">
+            {% for manga in newMangas %}
+                {% include 'partials/manga_card.html.twig' with {'manga': manga, 'showNewBadge': true} %}
+            {% else %}
+                <p>Aucune nouveauté disponible.</p>
+            {% endfor %}
+        </div>
+
+        <h2 class="mb-4 mt-5">Recommandés pour vous</h2>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-4">
+            {% for manga in recommendedMangas %}
+                {% include 'partials/manga_card.html.twig' with {'manga': manga} %}
+            {% else %}
+                <p>Aucun manga recommandé pour le moment.</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

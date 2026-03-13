@@ -1,0 +1,113 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion - Bibliothèque{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title mb-0">Connexion</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if error %}
+                            <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                        {% endif %}
+
+                        <form method="post" action="{{ path('app_login') }}">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="_username" value="{{ last_username }}" required autofocus>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Mot de passe</label>
+                                <input type="password" class="form-control" id="password" name="_password" required>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="remember_me" name="_remember_me">
+                                    <label class="form-check-label" for="remember_me">
+                                        Se souvenir de moi
+                                    </label>
+                                </div>
+                            </div>
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                            <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+                        </form>
+
+                        <div class="mt-3 text-center">
+                            <p>Vous n'avez pas de compte ? <a href="{{ path('app_register_page') }}" class="text-primary">Inscrivez-vous</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const registerForm = document.getElementById('registerForm');
+            const verificationForm = document.getElementById('verificationForm');
+            let userEmail = '';
+
+            registerForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const email = document.getElementById('register_email').value;
+                const password = document.getElementById('register_password').value;
+
+                try {
+                    const response = await fetch('/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email, password })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        userEmail = data.email;
+                        $('#registerModal').modal('hide');
+                        $('#verificationModal').modal('show');
+                    } else {
+                        alert(data.error);
+                    }
+                } catch (error) {
+                    alert('Une erreur est survenue lors de l\'inscription.');
+                }
+            });
+
+            verificationForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const code = document.getElementById('verification_code').value;
+
+                try {
+                    const response = await fetch('/verify', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ code })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        alert(data.message);
+                        $('#verificationModal').modal('hide');
+                        $('#loginModal').modal('show');
+                    } else {
+                        alert(data.error);
+                    }
+                } catch (error) {
+                    alert('Une erreur est survenue lors de la vérification.');
+                }
+            });
+        });
+    </script>
+{% endblock %} 

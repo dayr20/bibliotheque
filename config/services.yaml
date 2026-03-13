@@ -1,0 +1,20 @@
+# config/services.yaml
+
+parameters:
+
+services:
+    # Configuration par défaut pour les services
+    _defaults:
+        autowire: true      # Injection automatique des dépendances
+        autoconfigure: true # Enregistrement automatique (commandes, listeners, etc.)
+
+    # Rend toutes les classes du dossier src/ disponibles en tant que services
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+            - '../src/Migrations/'
+
+    # Tu peux ajouter ici des services manuels si nécessaire

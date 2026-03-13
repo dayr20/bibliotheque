@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Vérification de votre compte</title>
+    <style>
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .header {
+            background-color: #0d6efd;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 0 0 5px 5px;
+        }
+        .verification-code {
+            background-color: #e9ecef;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Vérification de votre compte</h1>
+        </div>
+        <div class="content">
+            <p>Bonjour,</p>
+            <p>Merci de vous être inscrit sur Bibliothèque. Pour finaliser votre inscription, veuillez utiliser le code de vérification suivant :</p>
+            
+            <div class="verification-code">
+                {{ code }}
+            </div>
+
+            <p>Ce code est valable pendant 24 heures. Si vous n'avez pas créé de compte sur Bibliothèque, vous pouvez ignorer cet email.</p>
+            
+            <p>Cordialement,<br>L'équipe Bibliothèque</p>
+        </div>
+    </div>
+</body>
+</html> 
