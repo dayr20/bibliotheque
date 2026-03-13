@@ -35,6 +35,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private bool $isVerified = false;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $avatarFilename = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $displayName = null;
+
     #[ORM\ManyToMany(targetEntity: Manga::class)]
     #[ORM\JoinTable(name: 'user_favorite_manga')]
     private Collection $favoriteMangas;
@@ -160,5 +166,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function isMangaFavorite(Manga $manga): bool
     {
         return $this->favoriteMangas->contains($manga);
+    }
+
+    public function getAvatarFilename(): ?string
+    {
+        return $this->avatarFilename;
+    }
+
+    public function setAvatarFilename(?string $avatarFilename): static
+    {
+        $this->avatarFilename = $avatarFilename;
+        return $this;
+    }
+
+    public function getDisplayName(): ?string
+    {
+        return $this->displayName;
+    }
+
+    public function setDisplayName(?string $displayName): static
+    {
+        $this->displayName = $displayName;
+        return $this;
+    }
+
+    public function getProfileName(): string
+    {
+        return $this->displayName ?? explode('@', $this->email ?? '')[0];
     }
 } 

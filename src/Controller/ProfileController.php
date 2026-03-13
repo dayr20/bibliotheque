@@ -120,4 +120,83 @@ class ProfileController extends AbstractController
             'isFavorite' => $isFavorite,
         ]);
     }
+
+    #[Route('/settings', name: 'app_profile_settings', methods: ['GET', 'POST'])]
+    public function settings(Request $request, EntityManagerInterface $em): Response
+    {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+
+        if ($request->isMethod('POST')) {
+            // Mise à jour du nom d'affichage
+            $displayName = trim((string) $request->request->get('display_name', ''));
+            if (!empty($displayName) && mb_strlen($displayName) <= 50) {
+                $user->setDisplayName($displayName);
+            }
+
+            // Upload d'avatar
+            $avatarFile = $request->files->get('avatar');
+            if ($avatarFile) {
+                $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                $maxSize = 2 * 1024 * 1024; // 2 Mo
+
+                if (!in_array($avatarFile->getMimeType(), $allowedMimes)) {
+                    $this->addFlash('error', 'Format d\'image non supporté. Utilisez JPG, PNG, GIF ou WebP.');
+                    return $this->redirectToRoute('app_profile_settings');
+                }
+
+                if ($avatarFile->getSize() > $maxSize) {
+                    $this->addFlash('error', 'L\'image ne doit pas dépasser 2 Mo.');
+                    return $this->redirectToRoute('app_profile_settings');
+                }
+
+                // Supprimer l'ancien avatar
+                if ($user->getAvatarFilename()) {
+                    $oldFile = $this->getParameter('kernel.project_dir') . '/public/uploads/avatars/' . $user->getAvatarFilename();
+                    if (file_exists($oldFile)) {
+                        unlink($oldFile);
+                    }
+                }
+
+                // Sauvegarder le nouveau
+                $newFilename = 'avatar_' . $user->getId() . '_' . uniqid() . '.' . $avatarFile->guessExtension();
+                $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/avatars';
+
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
+
+                $avatarFile->move($uploadDir, $newFilename);
+                $user->setAvatarFilename($newFilename);
+            }
+
+            $em->flush();
+            $this->addFlash('success', 'Profil mis à jour avec succès !');
+
+            return $this->redirectToRoute('app_profile_settings');
+        }
+
+        return $this->render('profile/settings.html.twig', [
+            'user' => $user,
+        ]);
+    }
+
+    #[Route('/avatar/delete', name: 'app_profile_avatar_delete', methods: ['POST'])]
+    public function deleteAvatar(EntityManagerInterface $em): Response
+    {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+
+        if ($user->getAvatarFilename()) {
+            $filePath = $this->getParameter('kernel.project_dir') . '/public/uploads/avatars/' . $user->getAvatarFilename();
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+            $user->setAvatarFilename(null);
+            $em->flush();
+            $this->addFlash('success', 'Avatar supprimé.');
+        }
+
+        return $this->redirectToRoute('app_profile_settings');
+    }
 }

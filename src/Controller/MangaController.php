@@ -25,21 +25,73 @@ class MangaController extends AbstractController
     ) {}
 
     #[Route('/', name: 'app_manga_index', methods: ['GET'])]
-    public function index(Request $request): Response
+    public function index(Request $request, GenreRepository $genreRepository, MangaRepository $mangaRepository): Response
     {
         $search = [
             'title' => $request->query->get('title', ''),
             'author' => $request->query->get('author', ''),
-            'genre' => $request->query->get('genre', '')
+            'genre' => $request->query->get('genre', ''),
+            'status' => $request->query->get('status', ''),
+            'year' => $request->query->get('year', ''),
+            'rating_min' => $request->query->get('rating_min', ''),
+            'sort' => $request->query->get('sort', 'rating'),
         ];
 
-        $hasSearch = array_filter($search, fn($value) => !empty($value));
-        $mangas = $hasSearch ? $this->mangaService->searchManga($search) : $this->mangaService->getPopularMangas();
+        $hasSearch = array_filter($search, fn($value) => !empty($value) && $value !== 'rating');
+
+        if ($hasSearch) {
+            // Recherche avancée via QueryBuilder
+            $qb = $mangaRepository->createQueryBuilder('m');
+
+            if (!empty($search['title'])) {
+                $qb->andWhere('m.title LIKE :title')->setParameter('title', '%' . $search['title'] . '%');
+            }
+            if (!empty($search['author'])) {
+                $qb->andWhere('m.author LIKE :author')->setParameter('author', '%' . $search['author'] . '%');
+            }
+            if (!empty($search['genre'])) {
+                $qb->join('m.genres', 'g')->andWhere('g.name = :genre')->setParameter('genre', $search['genre']);
+            }
+            if (!empty($search['status'])) {
+                $qb->andWhere('m.status = :status')->setParameter('status', $search['status']);
+            }
+            if (!empty($search['year'])) {
+                $qb->andWhere('m.year = :year')->setParameter('year', (int) $search['year']);
+            }
+            if (!empty($search['rating_min'])) {
+                $qb->andWhere('m.rating >= :ratingMin')->setParameter('ratingMin', (float) $search['rating_min']);
+            }
+
+            // Tri
+            match ($search['sort']) {
+                'title' => $qb->orderBy('m.title', 'ASC'),
+                'year' => $qb->orderBy('m.year', 'DESC'),
+                'newest' => $qb->orderBy('m.isNew', 'DESC')->addOrderBy('m.id', 'DESC'),
+                default => $qb->orderBy('m.rating', 'DESC'),
+            };
+
+            $mangas = $qb->setMaxResults(60)->getQuery()->getResult();
+        } else {
+            $mangas = $this->mangaService->getPopularMangas();
+        }
+
+        // Récupérer tous les genres pour le filtre
+        $genres = $genreRepository->findBy([], ['name' => 'ASC']);
+
+        // Récupérer les années distinctes
+        $years = $mangaRepository->createQueryBuilder('m')
+            ->select('DISTINCT m.year')
+            ->where('m.year IS NOT NULL')
+            ->orderBy('m.year', 'DESC')
+            ->getQuery()
+            ->getSingleColumnResult();
 
         return $this->render('manga/index.html.twig', [
             'mangas' => $mangas,
             'search' => $search,
-            'can_edit' => $this->isGranted('ROLE_ADMIN')
+            'genres' => $genres,
+            'years' => $years,
+            'can_edit' => $this->isGranted('ROLE_ADMIN'),
         ]);
     }
 
