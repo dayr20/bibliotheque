@@ -1,0 +1,659 @@
+/* ===================================
+   MangaZone - Dark Manga Theme
+   =================================== */
+
+:root {
+    --bg-primary: #0f0f1a;
+    --bg-secondary: #1a1a2e;
+    --bg-card: #16213e;
+    --bg-card-hover: #1a2744;
+    --accent: #e94560;
+    --accent-hover: #ff6b81;
+    --accent-secondary: #6c63ff;
+    --text-primary: #eaeaea;
+    --text-secondary: #a0a0b0;
+    --text-muted: #6b6b80;
+    --border: rgba(255, 255, 255, 0.06);
+    --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+    --shadow-hover: 0 8px 40px rgba(233, 69, 96, 0.15);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Reset & Base */
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+a {
+    color: var(--accent);
+    transition: var(--transition);
+}
+
+a:hover {
+    color: var(--accent-hover);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--bg-card); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ===== NAVBAR ===== */
+.navbar {
+    background: rgba(15, 15, 26, 0.95) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.8rem 0;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-brand {
+    font-weight: 800 !important;
+    font-size: 1.5rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+}
+
+.navbar .nav-link {
+    color: var(--text-secondary) !important;
+    font-weight: 500;
+    padding: 0.5rem 1rem !important;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link.active {
+    color: var(--text-primary) !important;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.navbar .btn-outline-light {
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.navbar .btn-outline-light:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--text-primary);
+}
+
+.navbar .dropdown-menu {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+    margin-top: 0.5rem;
+}
+
+.navbar .dropdown-item {
+    color: var(--text-secondary);
+    padding: 0.6rem 1.2rem;
+    transition: var(--transition);
+}
+
+.navbar .dropdown-item:hover {
+    background: rgba(233, 69, 96, 0.1);
+    color: var(--accent);
+}
+
+.navbar .dropdown-divider {
+    border-color: var(--border);
+}
+
+.navbar .badge.bg-danger {
+    background: var(--accent) !important;
+    font-size: 0.65rem;
+}
+
+/* ===== HERO SECTION ===== */
+.hero-section {
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, #0a0a1a 50%, var(--bg-secondary) 100%);
+    color: white;
+    padding: 5rem 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 50%, rgba(233, 69, 96, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(108, 99, 255, 0.08) 0%, transparent 50%);
+    animation: heroGlow 8s ease-in-out infinite alternate;
+}
+
+@keyframes heroGlow {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(2%, 2%) rotate(2deg); }
+}
+
+.hero-section .display-4 {
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.hero-section .lead {
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+}
+
+.hero-section .btn-light {
+    background: var(--accent);
+    border: none;
+    color: white !important;
+    padding: 0.75rem 2.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: var(--transition);
+    box-shadow: 0 4px 20px rgba(233, 69, 96, 0.3);
+}
+
+.hero-section .btn-light:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(233, 69, 96, 0.4);
+    color: white !important;
+}
+
+.hero-content {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+/* ===== SECTION TITLES ===== */
+.section-title,
+.container > h2 {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    position: relative;
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.section-title::after,
+.container > h2::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 50px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+    border-radius: 2px;
+}
+
+/* ===== CARDS ===== */
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.card:hover {
+    border-color: rgba(233, 69, 96, 0.15);
+}
+
+.card-body {
+    color: var(--text-primary);
+}
+
+.card-title {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.card-subtitle,
+.card .text-muted {
+    color: var(--text-secondary) !important;
+}
+
+.card-footer {
+    background: rgba(0, 0, 0, 0.15);
+    border-top: 1px solid var(--border);
+}
+
+/* ===== MANGA CARDS ===== */
+.manga-card {
+    transition: var(--transition);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.manga-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-hover);
+    border-color: rgba(233, 69, 96, 0.3);
+}
+
+.manga-cover {
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    width: 100%;
+}
+
+.manga-cover-container {
+    position: relative;
+    padding-top: 140%;
+    overflow: hidden;
+}
+
+.manga-cover-container .manga-cover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.manga-card:hover .manga-cover-container .manga-cover {
+    transform: scale(1.05);
+}
+
+.description-truncate {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* card-img-top override for manga/index */
+.card-img-top {
+    height: 320px;
+    object-fit: cover;
+}
+
+/* ===== BADGES ===== */
+.badge.bg-success {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    font-weight: 600;
+    font-size: 0.7rem;
+    padding: 0.4em 0.8em;
+    border-radius: 50px;
+    letter-spacing: 0.5px;
+}
+
+.badge.bg-danger {
+    background: var(--accent) !important;
+}
+
+.badge.bg-primary {
+    background: var(--accent-secondary) !important;
+    font-weight: 500;
+    border-radius: 50px;
+}
+
+.new-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+/* ===== RATINGS ===== */
+.rating {
+    color: #ffc107;
+}
+
+.rating .fa-star {
+    font-size: 0.85rem;
+}
+
+/* ===== FAVORITE BUTTON ===== */
+.favorite-btn {
+    background: rgba(15, 15, 26, 0.7);
+    backdrop-filter: blur(8px);
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: var(--transition);
+    z-index: 10;
+    padding: 0;
+}
+
+.favorite-btn:hover {
+    transform: scale(1.15);
+    background: rgba(233, 69, 96, 0.8);
+    border-color: var(--accent);
+}
+
+.favorite-btn i {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.favorite-btn.active i,
+.favorite-btn:hover i {
+    color: white;
+}
+
+.favorite-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.btn-primary:hover,
+.btn-primary:active,
+.btn-primary:focus {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(233, 69, 96, 0.3);
+}
+
+.btn-outline-primary {
+    color: var(--accent);
+    border-color: var(--accent);
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.btn-outline-primary:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(233, 69, 96, 0.3);
+}
+
+.btn-success {
+    background: #10b981;
+    border-color: #10b981;
+    border-radius: var(--radius-sm);
+}
+
+.btn-success:hover {
+    background: #34d399;
+    border-color: #34d399;
+}
+
+.btn-outline-secondary {
+    color: var(--text-secondary);
+    border-color: rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-sm);
+}
+
+.btn-outline-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--text-primary);
+}
+
+.btn-danger {
+    background: #dc2626;
+    border-color: #dc2626;
+    border-radius: var(--radius-sm);
+}
+
+.btn-danger:hover {
+    background: #ef4444;
+    border-color: #ef4444;
+}
+
+/* ===== FORMS ===== */
+.form-control,
+.form-select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    border-radius: var(--radius-sm);
+    padding: 0.65rem 1rem;
+    transition: var(--transition);
+}
+
+.form-control:focus,
+.form-select:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--accent);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.15);
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+}
+
+.form-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.form-text {
+    color: var(--text-muted);
+}
+
+.form-check-input {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.form-check-input:checked {
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+.form-check-label {
+    color: var(--text-secondary);
+}
+
+.form-select option {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+/* ===== ALERTS ===== */
+.alert {
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    margin: 1rem;
+}
+
+.alert-success {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border-left: 4px solid #10b981;
+}
+
+.alert-danger {
+    background: rgba(233, 69, 96, 0.15);
+    color: var(--accent-hover);
+    border-left: 4px solid var(--accent);
+}
+
+.alert-info {
+    background: rgba(108, 99, 255, 0.15);
+    color: #a5b4fc;
+    border-left: 4px solid var(--accent-secondary);
+}
+
+.alert .btn-close {
+    filter: invert(1);
+}
+
+/* ===== BREADCRUMB ===== */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+}
+
+.breadcrumb-item a {
+    color: var(--accent);
+}
+
+.breadcrumb-item.active {
+    color: var(--text-muted);
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    color: var(--text-muted);
+}
+
+/* ===== AUTH PAGES ===== */
+.card-header.bg-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-secondary)) !important;
+    border: none;
+    padding: 1.25rem 1.5rem;
+}
+
+.card-header .card-title {
+    color: white;
+}
+
+/* ===== MODAL ===== */
+.modal-content {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border);
+}
+
+.modal-title {
+    color: var(--text-primary);
+}
+
+.btn-close {
+    filter: invert(1);
+}
+
+/* ===== TABLE ===== */
+.table {
+    color: var(--text-primary);
+    --bs-table-bg: transparent;
+    --bs-table-striped-bg: rgba(255, 255, 255, 0.02);
+    --bs-table-striped-color: var(--text-primary);
+    --bs-table-hover-bg: rgba(233, 69, 96, 0.05);
+    --bs-table-hover-color: var(--text-primary);
+}
+
+.table > thead {
+    border-bottom: 2px solid var(--border);
+}
+
+.table > tbody > tr {
+    border-color: var(--border);
+}
+
+/* ===== FOOTER ===== */
+.footer {
+    background: linear-gradient(180deg, var(--bg-secondary), #0a0a14) !important;
+    border-top: 1px solid var(--border);
+}
+
+.footer h5 {
+    color: var(--text-primary) !important;
+    font-weight: 600;
+}
+
+.footer p,
+.footer li a {
+    color: var(--text-secondary) !important;
+}
+
+.footer a:hover {
+    color: var(--accent) !important;
+}
+
+.social-link {
+    color: var(--text-primary) !important;
+    background: rgba(255, 255, 255, 0.05);
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--transition);
+    text-decoration: none;
+    border: 1px solid var(--border);
+}
+
+.social-link:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(233, 69, 96, 0.3);
+    color: white !important;
+}
+
+.footer .form-control {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+}
+
+.footer .form-control::placeholder {
+    color: var(--text-muted);
+}
+
+.footer .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.footer hr {
+    border-color: var(--border);
+    opacity: 1;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 3rem 0;
+    }
+
+    .hero-section .display-4 {
+        font-size: 2rem;
+    }
+
+    .container > h2 {
+        font-size: 1.4rem;
+    }
+}

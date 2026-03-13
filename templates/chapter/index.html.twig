@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Chapitres de {{ manga.title }} - MangaZone{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Chapitres de {{ manga.title }}</h1>
+        {% if is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('app_chapter_new', {'id': manga.id}) }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Ajouter un chapitre
+            </a>
+        {% endif %}
+    </div>
+
+    {% if chapters|length > 0 %}
+        <div class="list-group">
+            {% for chapter in chapters|sort((a, b) => a.number <=> b.number) %}
+                <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1">Chapitre {{ chapter.number }} - {{ chapter.title }}</h5>
+                        <small class="text-muted">Ajouté le {{ chapter.createdAt|date('d/m/Y') }}</small>
+                    </div>
+                    <div class="btn-group">
+                        <a href="{{ path('app_manga_read', {'id': manga.id}) }}?chapter={{ chapter.id }}" 
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-book-reader me-1"></i>Lire
+                        </a>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <a href="{{ path('app_chapter_edit', {'id': chapter.id}) }}" 
+                               class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-edit me-1"></i>Modifier
+                            </a>
+                            <form action="{{ path('app_chapter_delete', {'id': chapter.id}) }}" 
+                                  method="post" style="display: inline;">
+                                <button type="submit" class="btn btn-outline-danger btn-sm" 
+                                        onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce chapitre ?')">
+                                    <i class="fas fa-trash me-1"></i>Supprimer
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Aucun chapitre n'a encore été ajouté pour ce manga.
+        </div>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{{ path('app_manga_show', {'id': manga.id}) }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Retour au manga
+        </a>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,113 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Rechercher un manga{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .manga-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+        height: 100%;
+    }
+    .manga-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
+    }
+    .manga-description {
+        max-height: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .card-img-top {
+        height: 300px;
+        object-fit: cover;
+        object-position: center;
+    }
+    .manga-title {
+        color: #2c3e50;
+        text-decoration: none;
+    }
+    .manga-title:hover {
+        color: #e74c3c;
+    }
+    .manga-author {
+        font-size: 0.9rem;
+        color: #7f8c8d;
+    }
+    .no-results {
+        text-align: center;
+        padding: 2rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-top: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="mb-4">Rechercher un manga</h1>
+    
+    <form action="{{ path('app_search') }}" method="get" class="mb-4">
+        <div class="input-group">
+            <input type="text" 
+                   name="q" 
+                   class="form-control form-control-lg" 
+                   value="{{ query }}" 
+                   placeholder="Rechercher un manga officiel..." 
+                   required>
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-search"></i> Rechercher
+            </button>
+        </div>
+    </form>
+
+    {% if query %}
+        {% if results|length > 0 %}
+            <div class="row">
+                {% for manga in results %}
+                    <div class="col-md-4 mb-4">
+                        <a href="{{ path('app_manga_details', {'id': manga.id}) }}" class="text-decoration-none">
+                            <div class="card h-100 manga-card shadow-sm">
+                                {% if manga.coverImage %}
+                                    <img src="{{ manga.coverImage }}" 
+                                         class="card-img-top" 
+                                         alt="{{ manga.title }}">
+                                {% else %}
+                                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center">
+                                        <span class="text-muted">Pas d'image</span>
+                                    </div>
+                                {% endif %}
+                                <div class="card-body">
+                                    <h5 class="card-title manga-title">{{ manga.title }}</h5>
+                                    <h6 class="card-subtitle mb-2 manga-author">{{ manga.author }}</h6>
+                                    <div class="manga-description">
+                                        <p class="card-text text-muted">
+                                            {% if manga.description|length > 150 %}
+                                                {{ manga.description|slice(0, 150) }}...
+                                            {% else %}
+                                                {{ manga.description }}
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-results">
+                <h3 class="text-muted">Aucun manga trouvé pour "{{ query }}"</h3>
+                <p>Essayez avec un autre titre ou vérifiez l'orthographe.</p>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="text-center mt-5">
+            <h4 class="text-muted">Recherchez parmi les mangas des plus grands auteurs</h4>
+            <p class="text-muted">Dragon Ball, One Piece, Naruto, etc.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

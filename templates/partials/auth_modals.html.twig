@@ -1,0 +1,134 @@
+<!-- Login Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loginModalLabel">Connexion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" id="loginForm" action="{{ path('app_login') }}">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="_username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Mot de passe</label>
+                        <input type="password" class="form-control" id="password" name="_password" required>
+                    </div>
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                    <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Register Modal -->
+<div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="registerModalLabel">Inscription</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="registerForm">
+                    <div class="mb-3">
+                        <label for="register_email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="register_email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="register_password" class="form-label">Mot de passe</label>
+                        <input type="password" class="form-control" id="register_password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">S'inscrire</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Verification Modal -->
+<div class="modal fade" id="verificationModal" tabindex="-1" aria-labelledby="verificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="verificationModalLabel">Vérification de l'email</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Un code de vérification a été envoyé à votre adresse email.</p>
+                <form id="verificationForm">
+                    <div class="mb-3">
+                        <label for="verification_code" class="form-label">Code de vérification</label>
+                        <input type="text" class="form-control" id="verification_code" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Vérifier</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const registerForm = document.getElementById('registerForm');
+    const verificationForm = document.getElementById('verificationForm');
+    let userEmail = '';
+
+    registerForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const email = document.getElementById('register_email').value;
+        const password = document.getElementById('register_password').value;
+
+        try {
+            const response = await fetch('{{ path('app_register') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+            
+            if (response.ok) {
+                userEmail = data.email;
+                $('#registerModal').modal('hide');
+                $('#verificationModal').modal('show');
+            } else {
+                alert(data.error);
+            }
+        } catch (error) {
+            alert('Une erreur est survenue lors de l\'inscription.');
+        }
+    });
+
+    verificationForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const code = document.getElementById('verification_code').value;
+
+        try {
+            const response = await fetch('{{ path('app_verify_email') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ code })
+            });
+
+            const data = await response.json();
+            
+            if (response.ok) {
+                alert(data.message);
+                $('#verificationModal').modal('hide');
+                $('#loginModal').modal('show');
+            } else {
+                alert(data.error);
+            }
+        } catch (error) {
+            alert('Une erreur est survenue lors de la vérification.');
+        }
+    });
+});</script> 

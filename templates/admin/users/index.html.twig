@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des utilisateurs{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <h1 class="mb-4">Gestion des utilisateurs</h1>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Rôles</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            <tr>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    {% for role in user.roles %}
+                                        <span class="badge bg-primary me-1">{{ role }}</span>
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% if user.isVerified %}
+                                        <span class="badge bg-success">Vérifié</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Non vérifié</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="{{ path('admin_user_edit', {'id': user.id}) }}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-edit"></i> Modifier les rôles
+                                        </a>
+                                        <form action="{{ path('admin_user_toggle_verification', {'id': user.id}) }}" 
+                                              method="post" 
+                                              style="display: inline;">
+                                            <button type="submit" class="btn btn-sm btn-outline-warning">
+                                                {% if user.isVerified %}
+                                                    <i class="fas fa-times"></i> Retirer la vérification
+                                                {% else %}
+                                                    <i class="fas fa-check"></i> Vérifier
+                                                {% endif %}
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

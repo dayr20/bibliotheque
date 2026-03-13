@@ -1,0 +1,158 @@
+<footer class="footer mt-auto py-4 bg-dark text-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-3 mb-md-0">
+                <h5 class="text-light mb-3">À propos de MangaZone</h5>
+                <p class="text-light mb-0">
+                    Votre destination pour découvrir et suivre vos mangas préférés. Une collection soigneusement sélectionnée pour tous les passionnés de manga.
+                </p>
+            </div>
+            <div class="col-md-2 mb-3 mb-md-0">
+                <h5 class="text-light mb-3">Navigation</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="{{ path('app_home') }}" class="text-light text-decoration-none">Accueil</a></li>
+                    <li class="mb-2"><a href="{{ path('app_manga_index') }}" class="text-light text-decoration-none">Catalogue</a></li>
+                    {% if app.user %}
+                        <li class="mb-2"><a href="{{ path('app_profile') }}" class="text-light text-decoration-none">Mon Profil</a></li>
+                    {% else %}
+                        <li class="mb-2"><a href="{{ path('app_login') }}" class="text-light text-decoration-none">Connexion</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="col-md-3 mb-3 mb-md-0">
+                <h5 class="text-light mb-3">Catégories</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="{{ path('app_manga_index') }}?genre=action" class="text-light text-decoration-none">Action</a></li>
+                    <li class="mb-2"><a href="{{ path('app_manga_index') }}?genre=aventure" class="text-light text-decoration-none">Aventure</a></li>
+                    <li class="mb-2"><a href="{{ path('app_manga_index') }}?genre=comedie" class="text-light text-decoration-none">Comédie</a></li>
+                    <li class="mb-2"><a href="{{ path('app_manga_index') }}?genre=drame" class="text-light text-decoration-none">Drame</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h5 class="text-light mb-3">Suivez-nous</h5>
+                <div class="social-links d-flex gap-3 mb-3">
+                    <a href="#" class="social-link" title="Facebook">
+                        <i class="fab fa-facebook fa-lg"></i>
+                    </a>
+                    <a href="#" class="social-link" title="Twitter">
+                        <i class="fab fa-twitter fa-lg"></i>
+                    </a>
+                    <a href="#" class="social-link" title="Instagram">
+                        <i class="fab fa-instagram fa-lg"></i>
+                    </a>
+                    <a href="#" class="social-link" title="Discord">
+                        <i class="fab fa-discord fa-lg"></i>
+                    </a>
+                </div>
+                <h5 class="text-light mb-3">Newsletter</h5>
+                <form class="mb-3">
+                    <div class="input-group">
+                        <input type="email" class="form-control" placeholder="Votre email">
+                        <button class="btn btn-primary" type="submit">S'abonner</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <hr class="my-4 bg-secondary">
+        <div class="row align-items-center">
+            <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                <p class="mb-0 text-light">&copy; {{ "now"|date("Y") }} MangaZone. Tous droits réservés.</p>
+            </div>
+            <div class="col-md-6 text-center text-md-end">
+                <ul class="list-inline mb-0">
+                    <li class="list-inline-item">
+                        <a href="#" class="text-light text-decoration-none">Mentions légales</a>
+                    </li>
+                    <li class="list-inline-item mx-3">
+                        <a href="#" class="text-light text-decoration-none">Confidentialité</a>
+                    </li>
+                    <li class="list-inline-item">
+                        <a href="#" class="text-light text-decoration-none">CGU</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<style>
+.footer {
+    background: linear-gradient(to right, #1a1a1a, #2d2d2d) !important;
+}
+
+.footer a:hover {
+    color: #fff !important;
+    transition: color 0.3s ease;
+}
+
+.footer .social-links a {
+    width: 35px;
+    height: 35px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.footer .social-links a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.footer hr {
+    opacity: 0.1;
+}
+
+.footer .form-control {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #fff;
+}
+
+.footer .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.footer .form-control:focus {
+    background-color: rgba(255, 255, 255, 0.15);
+    box-shadow: none;
+}
+
+.footer .btn-primary {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.footer .btn-primary:hover {
+    background-color: #bb2d3b;
+    border-color: #bb2d3b;
+}
+
+.social-link {
+    color: #fff !important;
+    background: rgba(255, 255, 255, 0.1);
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.social-link:hover {
+    background: #dc3545;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+}
+
+.social-link i {
+    transition: all 0.3s ease;
+}
+
+.social-link:hover i {
+    transform: scale(1.2);
+}
+</style> 

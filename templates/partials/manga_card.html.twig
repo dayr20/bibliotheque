@@ -1,0 +1,149 @@
+<div class="col">
+    <div class="card manga-card h-100">
+        <div class="position-relative">
+            <div class="manga-cover-container">
+                {% if manga.coverImage %}
+                    {% if manga.coverImage starts with 'https://uploads.mangadex.org/covers/' %}
+                        <img src="{{ manga.coverImage }}.512.jpg" 
+                             class="card-img-top manga-cover" 
+                             alt="{{ manga.title }}"
+                             loading="lazy"
+                             onerror="this.onerror=null; this.src='{{ asset('images/mangas/default.jpg') }}'"
+                        >
+                    {% else %}
+                        <img src="{{ manga.coverImage }}" 
+                             class="card-img-top manga-cover" 
+                             alt="{{ manga.title }}"
+                             loading="lazy"
+                             onerror="this.onerror=null; this.src='{{ asset('images/mangas/default.jpg') }}'"
+                        >
+                    {% endif %}
+                {% else %}
+                    <img src="{{ asset('images/mangas/default.jpg') }}" 
+                         class="card-img-top manga-cover" 
+                         alt="{{ manga.title }}"
+                         loading="lazy"
+                    >
+                {% endif %}
+            </div>
+
+            {% if showNewBadge is defined and showNewBadge and manga.isNew %}
+                <span class="badge bg-danger position-absolute top-0 start-0 m-2">Nouveau</span>
+            {% endif %}
+
+            {% if is_granted('ROLE_USER') %}
+                <button onclick="toggleFavorite(this, '{{ manga.id }}')" 
+                        class="btn favorite-btn position-absolute top-0 end-0 m-2 {% if app.user and app.user.isMangaFavorite(manga) %}active{% endif %}"
+                        title="{% if app.user and app.user.isMangaFavorite(manga) %}Retirer des favoris{% else %}Ajouter aux favoris{% endif %}">
+                    <i class="fas fa-heart"></i>
+                </button>
+            {% endif %}
+        </div>
+        <div class="card-body d-flex flex-column">
+            <h5 class="card-title text-truncate">{{ manga.title }}</h5>
+            <p class="text-muted small mb-2">{{ manga.author }}</p>
+            {% if manga.description %}
+                <p class="card-text small text-muted mb-2 description-truncate">{{ manga.description }}</p>
+            {% endif %}
+            <div class="d-flex align-items-center mb-2 mt-auto">
+                <div class="rating me-2">
+                    {% for i in 1..5 %}
+                        {% if i <= manga.rating %}
+                            <i class="fas fa-star text-warning"></i>
+                        {% else %}
+                            <i class="far fa-star text-warning"></i>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <span class="small text-muted">{{ manga.rating|number_format(1) }}</span>
+            </div>
+            <a href="{{ path('app_manga_show', {'id': manga.id}) }}" class="btn btn-outline-primary btn-sm">Voir plus</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.manga-cover-container {
+    position: relative;
+    padding-top: 140%; /* Ratio 1.4:1 */
+    overflow: hidden;
+}
+
+.manga-cover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.description-truncate {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.favorite-btn {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.favorite-btn:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+}
+
+.favorite-btn.active {
+    color: #dc3545;
+}
+
+.manga-card {
+    transition: transform 0.3s ease;
+}
+
+.manga-card:hover {
+    transform: translateY(-5px);
+}
+</style>
+
+{% block javascripts %}
+<script>
+function toggleFavorite(button, mangaId) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    fetch(`/profile/manga/${mangaId}/toggle-favorite`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (data.isFavorite) {
+                button.classList.add('active');
+                button.title = 'Retirer des favoris';
+            } else {
+                button.classList.remove('active');
+                button.title = 'Ajouter aux favoris';
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        alert('Une erreur est survenue lors de la mise à jour des favoris.');
+    });
+}
+</script>
+{% endblock %}
