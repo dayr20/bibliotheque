@@ -1,0 +1,88 @@
+stages:
+  - lint
+  - test
+  - build
+
+variables:
+  MYSQL_ROOT_PASSWORD: root
+  MYSQL_DATABASE: symfony_test
+  DATABASE_URL: "mysql://root:root@mysql:3306/symfony_test?serverVersion=8.0&charset=utf8mb4"
+  APP_ENV: test
+  APP_SECRET: ci_test_secret_do_not_use_in_production
+
+# Cache composer & npm entre les jobs
+cache:
+  paths:
+    - vendor/
+    - node_modules/
+
+# ========================
+# STAGE: LINT
+# ========================
+php-lint:
+  stage: lint
+  image: php:8.2-cli
+  before_script:
+    - apt-get update && apt-get install -y git unzip libzip-dev
+    - docker-php-ext-install zip pdo pdo_mysql
+    - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    - composer install --no-interaction --prefer-dist --optimize-autoloader
+  script:
+    - find src/ -name "*.php" -exec php -l {} \;
+    - echo "PHP syntax check passed"
+  allow_failure: false
+
+twig-lint:
+  stage: lint
+  image: php:8.2-cli
+  before_script:
+    - apt-get update && apt-get install -y git unzip libzip-dev libicu-dev
+    - docker-php-ext-install zip pdo pdo_mysql intl
+    - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    - composer install --no-interaction --prefer-dist --optimize-autoloader
+  script:
+    - php bin/console lint:twig templates/
+    - echo "Twig templates lint passed"
+  allow_failure: false
+
+# ========================
+# STAGE: TEST
+# ========================
+phpunit:
+  stage: test
+  image: php:8.2-cli
+  services:
+    - mysql:8.0
+  before_script:
+    - apt-get update && apt-get install -y git unzip libzip-dev libicu-dev
+    - docker-php-ext-install zip pdo pdo_mysql intl
+    - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    - composer install --no-interaction --prefer-dist --optimize-autoloader
+    # Attendre que MySQL soit prêt
+    - |
+      for i in $(seq 1 30); do
+        php -r "try { new PDO('mysql:host=mysql;dbname=symfony_test', 'root', 'root'); echo 'MySQL ready'; exit(0); } catch(Exception \$e) { sleep(2); }" && break
+      done
+    - php bin/console doctrine:schema:create --env=test --no-interaction || true
+  script:
+    - php bin/phpunit --testdox
+  artifacts:
+    when: always
+    reports:
+      junit: var/log/phpunit-report.xml
+
+# ========================
+# STAGE: BUILD
+# ========================
+assets-build:
+  stage: build
+  image: node:18-alpine
+  before_script:
+    - npm ci --prefer-offline
+  script:
+    - npx encore production
+    - echo "Assets built successfully"
+  artifacts:
+    paths:
+      - public/build/
+    expire_in: 1 week
