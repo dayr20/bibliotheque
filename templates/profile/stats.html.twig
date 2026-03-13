@@ -1,0 +1,242 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Statistiques{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('app_profile') }}">Mon Profil</a></li>
+            <li class="breadcrumb-item active">Statistiques</li>
+        </ol>
+    </nav>
+
+    <h1 class="mb-4"><i class="fas fa-chart-bar"></i> Mes Statistiques</h1>
+
+    {# Chiffres clés #}
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div style="font-size: 2.5rem; color: var(--accent, #e94560);">{{ totalInList }}</div>
+                    <small class="text-muted">Mangas dans la liste</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div style="font-size: 2.5rem; color: #28a745;">{{ totalRead }}</div>
+                    <small class="text-muted">Mangas terminés</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div style="font-size: 2.5rem; color: #6c63ff;">{{ totalReviews }}</div>
+                    <small class="text-muted">Avis donnés</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div style="font-size: 2.5rem; color: #ffc107;">{{ totalFavorites }}</div>
+                    <small class="text-muted">Favoris</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {# Graphique statut de lecture #}
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Répartition des lectures</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        {# Graphique notes données #}
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-star"></i> Distribution des notes</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="ratingChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        {# Genres préférés #}
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-tags"></i> Genres préférés</h5>
+                </div>
+                <div class="card-body">
+                    {% if topGenres|length > 0 %}
+                        <canvas id="genreChart" height="250"></canvas>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-chart-bar fa-3x text-muted mb-2"></i>
+                            <p class="text-muted">Ajoutez des mangas à votre liste pour voir vos genres préférés.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {# Résumé #}
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Résumé</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><i class="fas fa-book text-primary"></i> En cours</span>
+                            <span class="badge bg-primary rounded-pill">{{ totalReading }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><i class="fas fa-check text-success"></i> Terminés</span>
+                            <span class="badge bg-success rounded-pill">{{ totalRead }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><i class="fas fa-bookmark text-info"></i> À lire</span>
+                            <span class="badge bg-info rounded-pill">{{ totalToRead }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><i class="fas fa-times text-danger"></i> Abandonnés</span>
+                            <span class="badge bg-danger rounded-pill">{{ totalDropped }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><i class="fas fa-star text-warning"></i> Note moyenne</span>
+                            <span>{{ avgRatingGiven }}/5</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Status Pie Chart
+    const statusCtx = document.getElementById('statusChart');
+    if (statusCtx) {
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['En cours', 'Terminés', 'À lire', 'Abandonnés'],
+                datasets: [{
+                    data: [{{ totalReading }}, {{ totalRead }}, {{ totalToRead }}, {{ totalDropped }}],
+                    backgroundColor: ['#007bff', '#28a745', '#17a2b8', '#dc3545'],
+                    borderColor: 'rgba(255,255,255,0.1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#e0e0e0', padding: 15 }
+                    }
+                }
+            }
+        });
+    }
+
+    // Rating Bar Chart
+    const ratingCtx = document.getElementById('ratingChart');
+    if (ratingCtx) {
+        new Chart(ratingCtx, {
+            type: 'bar',
+            data: {
+                labels: ['1 ★', '2 ★★', '3 ★★★', '4 ★★★★', '5 ★★★★★'],
+                datasets: [{
+                    label: 'Nombre d\'avis',
+                    data: [
+                        {{ ratingDistribution[1] }},
+                        {{ ratingDistribution[2] }},
+                        {{ ratingDistribution[3] }},
+                        {{ ratingDistribution[4] }},
+                        {{ ratingDistribution[5] }}
+                    ],
+                    backgroundColor: ['#dc3545', '#fd7e14', '#ffc107', '#20c997', '#28a745'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#a0a0b0', stepSize: 1 },
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    },
+                    x: {
+                        ticks: { color: '#a0a0b0' },
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+
+    // Genre Bar Chart
+    const genreCtx = document.getElementById('genreChart');
+    if (genreCtx) {
+        const genreLabels = {{ topGenres|keys|json_encode|raw }};
+        const genreData = {{ topGenres|json_encode|raw }};
+
+        new Chart(genreCtx, {
+            type: 'bar',
+            data: {
+                labels: genreLabels,
+                datasets: [{
+                    label: 'Mangas',
+                    data: Object.values(genreData),
+                    backgroundColor: '#e94560',
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: { color: '#a0a0b0', stepSize: 1 },
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    },
+                    y: {
+                        ticks: { color: '#e0e0e0' },
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

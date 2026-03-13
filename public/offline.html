@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MangaZone - Hors ligne</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f1a;
+            color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 2rem;
+        }
+        .container { max-width: 500px; }
+        .icon { font-size: 5rem; margin-bottom: 1.5rem; }
+        h1 { color: #e94560; margin-bottom: 1rem; font-size: 2rem; }
+        p { color: #a0a0b0; margin-bottom: 1.5rem; line-height: 1.6; }
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            background: #e94560;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+        .btn:hover { background: #c73e55; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">&#128214;</div>
+        <h1>Vous êtes hors ligne</h1>
+        <p>Impossible de se connecter au serveur. Vérifiez votre connexion internet et réessayez.</p>
+        <button class="btn" onclick="window.location.reload()">Réessayer</button>
+    </div>
+</body>
+</html>

@@ -1,0 +1,80 @@
+# ============================================
+# Stage 1: Composer dependencies
+# ============================================
+FROM php:8.2-cli AS composer-stage
+
+RUN apt-get update && apt-get install -y \
+    git curl zip unzip libzip-dev libicu-dev \
+    && docker-php-ext-install zip intl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+
+COPY . .
+RUN composer dump-autoload --optimize --classmap-authoritative
+
+# ============================================
+# Stage 2: Node.js assets build
+# ============================================
+FROM node:20-alpine AS node-stage
+
+WORKDIR /app
+COPY package.json package-lock.json* yarn.lock* ./
+RUN npm install --production=false 2>/dev/null || yarn install 2>/dev/null || true
+
+COPY webpack.config.js ./
+COPY assets/ ./assets/
+RUN npx encore production 2>/dev/null || true
+
+# ============================================
+# Stage 3: Production image (Nginx + PHP-FPM)
+# ============================================
+FROM php:8.2-fpm AS production
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    nginx \
+    supervisor \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    libzip-dev \
+    libicu-dev \
+    && docker-php-ext-install pdo pdo_mysql opcache zip intl \
+    && rm -rf /var/lib/apt/lists/*
+
+# PHP production configuration
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
+# OPcache optimization
+COPY docker/opcache-prod.ini /usr/local/etc/php/conf.d/opcache-prod.ini
+
+# Nginx configuration
+COPY docker/nginx-prod.conf /etc/nginx/sites-available/default
+
+# Supervisor configuration
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+WORKDIR /var/www/html
+
+# Copy application code
+COPY --from=composer-stage /app/vendor ./vendor
+COPY --from=composer-stage /app/composer.json ./
+COPY --from=node-stage /app/public/build ./public/build
+COPY . .
+
+# Set permissions
+RUN mkdir -p var/cache var/log public/uploads/avatars \
+    && chown -R www-data:www-data var/ public/uploads/ \
+    && chmod -R 775 var/ public/uploads/
+
+# Warmup cache
+RUN APP_ENV=prod APP_DEBUG=0 php bin/console cache:warmup 2>/dev/null || true
+
+EXPOSE 80
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
