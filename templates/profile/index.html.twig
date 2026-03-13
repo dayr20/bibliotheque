@@ -1,83 +1,123 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mon profil{% endblock %}
-
-{% block stylesheets %}
-{{ parent() }}
-<style>
-    .manga-card {
-        transition: all 0.3s ease;
-        height: 100%;
-    }
-    .manga-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
-    .manga-cover {
-        height: 300px;
-        object-fit: cover;
-        border-radius: 8px 8px 0 0;
-    }
-    .favorite-btn {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: rgba(255, 255, 255, 0.9);
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: none;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    .favorite-btn:hover {
-        transform: scale(1.1);
-    }
-    .favorite-btn.active {
-        color: #dc3545;
-    }
-</style>
-{% endblock %}
+{% block title %}Mon profil - MangaZone{% endblock %}
 
 {% block body %}
 <div class="container py-4">
-    <div class="row mb-4">
-        <div class="col">
-            <h1>Mon profil</h1>
-            <p class="text-muted">{{ user.email }}</p>
+    {# Header profil #}
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle bg-danger d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+                    <i class="fas fa-user fa-2x text-white"></i>
+                </div>
+                <div>
+                    <h2 class="mb-0">{{ user.email }}</h2>
+                    <span class="badge bg-primary">{{ user.roles|first }}</span>
+                </div>
+            </div>
         </div>
     </div>
 
+    {# Stats rapides #}
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card text-center">
+                <div class="card-body py-3">
+                    <div class="h3 mb-0 text-warning">{{ statusCounts['to_read'] ?? 0 }}</div>
+                    <small class="text-muted">A lire</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card text-center">
+                <div class="card-body py-3">
+                    <div class="h3 mb-0 text-info">{{ statusCounts['reading'] ?? 0 }}</div>
+                    <small class="text-muted">En cours</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card text-center">
+                <div class="card-body py-3">
+                    <div class="h3 mb-0 text-success">{{ statusCounts['completed'] ?? 0 }}</div>
+                    <small class="text-muted">Terminés</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card text-center">
+                <div class="card-body py-3">
+                    <div class="h3 mb-0" style="color: var(--accent);">{{ user.favoriteMangas|length }}</div>
+                    <small class="text-muted">Favoris</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Reprendre la lecture #}
+    {% if recentReads|length > 0 %}
     <div class="card mb-4">
         <div class="card-body">
-            <h2 class="card-title mb-4">Mes mangas favoris</h2>
-            
-            {% if user.favoriteMangas|length > 0 %}
-                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                    {% for manga in user.favoriteMangas %}
-                        <div class="col">
-                            <div class="card manga-card h-100 position-relative">
-                                {% if manga.coverImage %}
-                                    <img src="{{ manga.coverImage }}" class="manga-cover" alt="{{ manga.title }}">
-                                {% else %}
-                                    <div class="manga-cover bg-light d-flex align-items-center justify-content-center">
-                                        <i class="fas fa-book fa-3x text-muted"></i>
-                                    </div>
-                                {% endif %}
-                                
-                                <button class="favorite-btn active" 
-                                        onclick="toggleFavorite(this, '{{ manga.id }}')"
-                                        title="Retirer des favoris">
-                                    <i class="fas fa-heart"></i>
-                                </button>
+            <h3 class="mb-3"><i class="fas fa-history me-2"></i>Reprendre la lecture</h3>
+            <div class="row g-3">
+                {% for progress in recentReads %}
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center gap-3 p-2 rounded" style="background: rgba(255,255,255,0.03);">
+                        {% if progress.manga.coverImage %}
+                            <img src="{{ progress.manga.coverImage }}" alt="{{ progress.manga.title }}" style="width: 50px; height: 70px; object-fit: cover; border-radius: 6px;">
+                        {% endif %}
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0">{{ progress.manga.title }}</h6>
+                            <small class="text-muted">Chapitre {{ progress.lastChapter.number }} - {{ progress.lastReadAt|date('d/m/Y') }}</small>
+                        </div>
+                        <a href="{{ path('app_reader', {'id': progress.lastChapter.id}) }}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-play"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
-                                <div class="card-body">
-                                    <h5 class="card-title">{{ manga.title }}</h5>
-                                    <p class="card-text text-muted">{{ manga.author }}</p>
-                                    <p class="card-text">{{ manga.description|slice(0, 150) }}...</p>
+    {# Listes de lecture #}
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="mb-0"><i class="fas fa-list me-2"></i>Mes listes</h3>
+            </div>
+            <ul class="nav nav-pills mb-3">
+                {% for key, label in statuses %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if loop.first %}active{% endif %}" href="{{ path('app_profile_list', {'status': key}) }}">
+                            {{ label }}
+                            <span class="badge bg-secondary ms-1">{{ statusCounts[key] ?? 0 }}</span>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            {% if readingLists|length > 0 %}
+                <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3">
+                    {% for entry in readingLists|slice(0, 6) %}
+                        <div class="col">
+                            <div class="card manga-card h-100">
+                                <div class="position-relative">
+                                    {% if entry.manga.coverImage %}
+                                        <img src="{{ entry.manga.coverImage }}" class="card-img-top" alt="{{ entry.manga.title }}" style="height: 200px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="card-img-top bg-dark d-flex align-items-center justify-content-center" style="height: 200px;">
+                                            <i class="fas fa-book fa-2x text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                    <span class="badge position-absolute bottom-0 start-0 m-2 {% if entry.status == 'reading' %}bg-info{% elseif entry.status == 'completed' %}bg-success{% elseif entry.status == 'dropped' %}bg-secondary{% else %}bg-warning text-dark{% endif %}">
+                                        {{ entry.statusLabel }}
+                                    </span>
+                                </div>
+                                <div class="card-body p-2">
+                                    <small class="fw-bold text-truncate d-block">{{ entry.manga.title }}</small>
                                 </div>
                             </div>
                         </div>
@@ -86,52 +126,40 @@
             {% else %}
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle me-2"></i>
-                    Vous n'avez pas encore de mangas favoris.
-                    <a href="{{ path('app_manga_index') }}" class="alert-link">Parcourir les mangas</a>
+                    Aucun manga dans vos listes.
+                    <a href="{{ path('app_manga_index') }}">Parcourir le catalogue</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# Favoris #}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3 class="mb-3"><i class="fas fa-heart me-2" style="color: var(--accent);"></i>Mes favoris</h3>
+            {% if user.favoriteMangas|length > 0 %}
+                <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3">
+                    {% for manga in user.favoriteMangas %}
+                        <div class="col">
+                            <div class="card manga-card h-100">
+                                {% if manga.coverImage %}
+                                    <img src="{{ manga.coverImage }}" class="card-img-top" alt="{{ manga.title }}" style="height: 200px; object-fit: cover;">
+                                {% endif %}
+                                <div class="card-body p-2">
+                                    <small class="fw-bold text-truncate d-block">{{ manga.title }}</small>
+                                    <a href="{{ path('app_manga_show', {'id': manga.id}) }}" class="stretched-link"></a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Aucun favori. Cliquez sur <i class="fas fa-heart"></i> sur un manga pour l'ajouter.
                 </div>
             {% endif %}
         </div>
     </div>
 </div>
 {% endblock %}
-
-{% block javascripts %}
-{{ parent() }}
-<script>
-function toggleFavorite(button, mangaId) {
-    fetch(`/profile/manga/${mangaId}/toggle-favorite`, {
-        method: 'POST',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            if (!data.isFavorite) {
-                // Si le manga n'est plus en favori, on supprime la carte
-                button.closest('.col').remove();
-                
-                // Si c'était le dernier manga favori, on affiche le message
-                const mangaCards = document.querySelectorAll('.manga-card');
-                if (mangaCards.length === 0) {
-                    const container = document.querySelector('.card-body');
-                    container.innerHTML = `
-                        <h2 class="card-title mb-4">Mes mangas favoris</h2>
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            Vous n'avez pas encore de mangas favoris.
-                            <a href="{{ path('app_manga_index') }}" class="alert-link">Parcourir les mangas</a>
-                        </div>
-                    `;
-                }
-            }
-        }
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-        alert('Une erreur est survenue lors de la mise à jour des favoris.');
-    });
-}
-</script>
-{% endblock %} 

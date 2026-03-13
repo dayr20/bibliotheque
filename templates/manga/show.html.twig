@@ -30,9 +30,9 @@
                             <span class="badge bg-success">Nouveau</span>
                         {% endif %}
                     </div>
-                    
+
                     <h3 class="card-subtitle mb-3 text-muted">par {{ manga.author }}</h3>
-                    
+
                     <div class="rating mb-3">
                         <span class="me-2">Note :</span>
                         {% for i in 1..5 %}
@@ -44,6 +44,22 @@
                         {% endfor %}
                         <span class="ms-2">({{ manga.rating }}/5)</span>
                     </div>
+
+                    {% if averageRating is defined and averageRating is not null %}
+                        <div class="mb-3">
+                            <span class="me-2"><i class="fas fa-users"></i> Note des lecteurs :</span>
+                            {% for i in 1..5 %}
+                                {% if i <= averageRating %}
+                                    <i class="fas fa-star" style="color: var(--accent, #e94560);"></i>
+                                {% elseif i - 0.5 <= averageRating %}
+                                    <i class="fas fa-star-half-alt" style="color: var(--accent, #e94560);"></i>
+                                {% else %}
+                                    <i class="far fa-star" style="color: var(--accent, #e94560);"></i>
+                                {% endif %}
+                            {% endfor %}
+                            <span class="ms-2">({{ averageRating }}/5 - {{ reviewCount }} avis)</span>
+                        </div>
+                    {% endif %}
 
                     <h4>Description</h4>
                     <p class="card-text">{{ manga.description }}</p>
@@ -74,6 +90,147 @@
             </div>
         </div>
     </div>
+
+    {# ===================== SECTION AVIS ===================== #}
+    <div class="mt-5">
+        <h2 class="mb-4">
+            <i class="fas fa-comments"></i> Avis des lecteurs
+            {% if reviewCount is defined and reviewCount > 0 %}
+                <span class="badge bg-secondary ms-2">{{ reviewCount }}</span>
+            {% endif %}
+        </h2>
+
+        {# Formulaire d'ajout / modification d'avis #}
+        {% if app.user %}
+            <div class="card mb-4" id="review-form">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        {% if userReview is defined and userReview %}
+                            <i class="fas fa-edit"></i> Modifier votre avis
+                        {% else %}
+                            <i class="fas fa-pen"></i> Laisser un avis
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ path('app_manga_review', {'id': manga.id}) }}" method="post">
+                        <input type="hidden" name="_token" value="{{ csrf_token('review' ~ manga.id) }}">
+
+                        <div class="mb-3">
+                            <label class="form-label">Votre note</label>
+                            <div class="star-rating-input">
+                                {% for i in 5..1 %}
+                                    <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}"
+                                        {% if userReview is defined and userReview and userReview.rating == i %}checked{% endif %}
+                                        {% if (userReview is not defined or not userReview) and i == 5 %}checked{% endif %}
+                                    >
+                                    <label for="star{{ i }}" title="{{ i }} étoile{{ i > 1 ? 's' : '' }}">
+                                        <i class="fas fa-star"></i>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="comment" class="form-label">Votre commentaire</label>
+                            <textarea class="form-control" id="comment" name="comment" rows="4"
+                                placeholder="Partagez votre avis sur ce manga..." required
+                                maxlength="2000">{% if userReview is defined and userReview %}{{ userReview.comment }}{% endif %}</textarea>
+                            <div class="form-text">Maximum 2000 caractères</div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                                {% if userReview is defined and userReview %}Mettre à jour{% else %}Publier{% endif %}
+                            </button>
+
+                            {% if userReview is defined and userReview %}
+                                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteReviewModal">
+                                    <i class="fas fa-trash"></i> Supprimer mon avis
+                                </button>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {# Modal de confirmation de suppression #}
+            {% if userReview is defined and userReview %}
+                <div class="modal fade" id="deleteReviewModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Supprimer votre avis</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Êtes-vous sûr de vouloir supprimer votre avis ? Cette action est irréversible.</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                <form action="{{ path('app_manga_review_delete', {'id': manga.id}) }}" method="post">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_review' ~ manga.id) }}">
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="fas fa-trash"></i> Confirmer la suppression
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="alert alert-info mb-4">
+                <i class="fas fa-info-circle"></i>
+                <a href="{{ path('app_login') }}">Connectez-vous</a> pour laisser un avis sur ce manga.
+            </div>
+        {% endif %}
+
+        {# Liste des avis #}
+        {% if reviews is defined and reviews|length > 0 %}
+            {% for review in reviews %}
+                <div class="card mb-3 review-card {% if app.user and review.user == app.user %}border-primary{% endif %}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h5 class="card-title mb-1">
+                                    <i class="fas fa-user-circle"></i>
+                                    {{ review.user.email|split('@')[0] }}
+                                    {% if app.user and review.user == app.user %}
+                                        <span class="badge bg-primary ms-1">Vous</span>
+                                    {% endif %}
+                                </h5>
+                                <div class="review-rating">
+                                    {% for i in 1..5 %}
+                                        {% if i <= review.rating %}
+                                            <i class="fas fa-star" style="color: var(--accent, #e94560);"></i>
+                                        {% else %}
+                                            <i class="far fa-star" style="color: var(--accent, #e94560);"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <span class="ms-1 text-muted">({{ review.rating }}/5)</span>
+                                </div>
+                            </div>
+                            <small class="text-muted">
+                                <i class="fas fa-clock"></i>
+                                {{ review.createdAt|date('d/m/Y à H:i') }}
+                                {% if review.updatedAt %}
+                                    <br><em>(modifié le {{ review.updatedAt|date('d/m/Y à H:i') }})</em>
+                                {% endif %}
+                            </small>
+                        </div>
+                        <p class="card-text mt-2">{{ review.comment|nl2br }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-comment-slash fa-3x text-muted mb-3"></i>
+                <p class="text-muted">Aucun avis pour ce manga. Soyez le premier à donner votre avis !</p>
+            </div>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}
 
@@ -84,6 +241,40 @@
     width: 100%;
     height: 500px;
     object-fit: cover;
+}
+
+/* Star rating input */
+.star-rating-input {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    gap: 2px;
+}
+
+.star-rating-input input {
+    display: none;
+}
+
+.star-rating-input label {
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: #ccc;
+    transition: color 0.2s;
+}
+
+.star-rating-input input:checked ~ label,
+.star-rating-input label:hover,
+.star-rating-input label:hover ~ label {
+    color: var(--accent, #e94560);
+}
+
+/* Review cards */
+.review-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.review-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 </style>
 {% endblock %}
